@@ -24,12 +24,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
         fontFamily: 'IranSans',
       ),
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [
+      supportedLocales: const [
         Locale('fa' , ''),
       ],
       home: RootPage(),
