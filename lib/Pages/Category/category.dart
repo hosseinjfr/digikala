@@ -12,9 +12,12 @@ class Category extends StatefulWidget {
 
 class _CategoryState extends State<Category> {
   List<Widget> catList = [];
-  List Cat = [];
-  String status = 'load_data';
-  _CategoryState() {
+  List cat = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
     _getCatList();
   }
 
@@ -34,26 +37,25 @@ class _CategoryState extends State<Category> {
     var url = Uri.parse(Lib.getApiUrl('getCategory'));
     http.get(url).then((response) {
       if (response.statusCode == 200) {
-        status = 'load data';
-        Cat = convert.jsonDecode(response.body);
-        for (int i = 0; i < Cat.length; i++) {
-          List child = Cat[i]['get_child'];
-          if (child.length > 0) {
-            Widget widget = Container(
+        cat = convert.jsonDecode(response.body);
+        for (int i = 0; i < cat.length; i++) {
+          List child = cat[i]['get_child'];
+          if (child.isNotEmpty) {
+            Widget widget = SizedBox(
               width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
+                  const Padding(
                       padding:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 10)),
                   Text(
-                    Cat[i]['name'],
-                    style: TextStyle(
+                    cat[i]['name'],
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     child: ListView.builder(
                       itemBuilder: (context, index) =>
                           _getChildCat(context, index, child),
@@ -61,6 +63,7 @@ class _CategoryState extends State<Category> {
                       scrollDirection: Axis.horizontal,
                     ),
                     height: 150,
+                    width: double.infinity,
                   ),
                 ],
               ),
@@ -75,7 +78,7 @@ class _CategoryState extends State<Category> {
 
   Widget _getChildCat(BuildContext context, int index, List child) {
     return Container(
-      margin: EdgeInsets.only(left: 10),
+      margin: const EdgeInsets.only(left: 10),
       child: Column(
         children: [
           child[index]['img'] == null
@@ -94,11 +97,15 @@ class _CategoryState extends State<Category> {
                   height: 100,
                   fit: BoxFit.cover,
                 ),
-          SizedBox(height: 15.0,),
-          Text(child[index]['name'] ,
-          style: TextStyle(
-            fontSize: 14.0,
-          ),),
+          const SizedBox(
+            height: 15.0,
+          ),
+          Text(
+            child[index]['name'],
+            style: const TextStyle(
+              fontSize: 14.0,
+            ),
+          ),
         ],
       ),
       decoration: BoxDecoration(
@@ -108,5 +115,4 @@ class _CategoryState extends State<Category> {
       ),
     );
   }
-
 }
