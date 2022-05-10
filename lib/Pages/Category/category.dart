@@ -16,7 +16,6 @@ class _CategoryState extends State<Category> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _getCatList();
   }
@@ -72,6 +71,10 @@ class _CategoryState extends State<Category> {
           }
         }
         setState(() {});
+      } else {
+        setState(() {
+          print('Fetch data error');
+        });
       }
     });
   }
