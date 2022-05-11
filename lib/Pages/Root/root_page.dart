@@ -26,7 +26,7 @@ class _RootPageState extends State<RootPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'دیجیکالا',
+          'فروشگاه اینترنتی',
           style: TextStyle(
             fontSize: 17.0,
           ),
@@ -95,7 +95,7 @@ class _RootPageState extends State<RootPage> {
           icon: Icon(
             Icons.person,
           ),
-          label: 'دیجی کالای من',
+          label: 'فروشگاه من',
         ),
       ],
     );

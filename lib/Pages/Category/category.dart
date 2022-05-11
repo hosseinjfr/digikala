@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
@@ -33,49 +35,57 @@ class _CategoryState extends State<Category> {
   }
 
   void _getCatList() {
-    var url = Uri.parse(Lib.getApiUrl('getCategory'));
+    var url = Uri.parse(Lib.getApiUrl('getCategory1'));
     http.get(url).then((response) {
       if (response.statusCode == 200) {
         cat = convert.jsonDecode(response.body);
-        for (int i = 0; i < cat.length; i++) {
-          List child = cat[i]['get_child'];
-          if (child.isNotEmpty) {
-            Widget widget = SizedBox(
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 10)),
-                  Text(
-                    cat[i]['name'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+        if (cat.isNotEmpty) {
+          for (int i = 0; i < cat.length; i++) {
+            List child = cat[i]['get_child'];
+            if (child.isNotEmpty) {
+              Widget widget = SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 10)),
+                    Text(
+                      cat[i]['name'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    child: ListView.builder(
-                      itemBuilder: (context, index) =>
-                          _getChildCat(context, index, child),
-                      itemCount: child.length,
-                      scrollDirection: Axis.horizontal,
+                    SizedBox(
+                      child: ListView.builder(
+                        itemBuilder: (context, index) =>
+                            _getChildCat(context, index, child),
+                        itemCount: child.length,
+                        scrollDirection: Axis.horizontal,
+                      ),
+                      height: 150,
+                      width: double.infinity,
                     ),
-                    height: 150,
-                    width: double.infinity,
-                  ),
-                ],
-              ),
-            );
-            catList.add(widget);
+                  ],
+                ),
+              );
+              catList.add(widget);
+            }
           }
+        } else {
+          return const Center(
+            child: Text(
+              'هیچ دسته بندی موجود نمی باشد',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0,
+              ),
+            ),
+          );
         }
         setState(() {});
-      } else {
-        setState(() {
-          print('Fetch data error');
-        });
-      }
+      } else {}
     });
   }
 
