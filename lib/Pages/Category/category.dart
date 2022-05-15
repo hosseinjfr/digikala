@@ -35,7 +35,7 @@ class _CategoryState extends State<Category> {
   }
 
   void _getCatList() {
-    var url = Uri.parse(Lib.getApiUrl('getCategory1'));
+    var url = Uri.parse(Lib.getApiUrl('getCategory'));
     http.get(url).then((response) {
       if (response.statusCode == 200) {
         cat = convert.jsonDecode(response.body);
