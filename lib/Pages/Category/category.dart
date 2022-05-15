@@ -1,5 +1,6 @@
-import 'dart:ui';
-
+import 'package:digikala/Lib/error.dart';
+import 'package:digikala/Lib/loading.dart';
+import 'package:digikala/Pages/Category/category_child.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
@@ -15,6 +16,7 @@ class Category extends StatefulWidget {
 class _CategoryState extends State<Category> {
   List<Widget> catList = [];
   List cat = [];
+  String state = 'load_data';
 
   @override
   void initState() {
@@ -24,107 +26,128 @@ class _CategoryState extends State<Category> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 10),
-        child: Column(
-          children: catList,
-        ),
-      ),
-    );
+    return state == 'load_data'
+        ? Loading()
+        : state == 'get_data'
+            ? SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Column(
+                    children: catList,
+                  ),
+                ),
+              )
+            : Error();
   }
 
   void _getCatList() {
     var url = Uri.parse(Lib.getApiUrl('getCategory'));
     http.get(url).then((response) {
       if (response.statusCode == 200) {
-        cat = convert.jsonDecode(response.body);
-        if (cat.isNotEmpty) {
-          for (int i = 0; i < cat.length; i++) {
-            List child = cat[i]['get_child'];
-            if (child.isNotEmpty) {
-              Widget widget = SizedBox(
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 10)),
-                    Text(
-                      cat[i]['name'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+        setState(() {
+          state = 'get_data';
+          cat = convert.jsonDecode(response.body);
+          if (cat.isNotEmpty) {
+            for (int i = 0; i < cat.length; i++) {
+              List child = cat[i]['get_child'];
+              if (child.isNotEmpty) {
+                Widget widget = SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10)),
+                      Text(
+                        cat[i]['name'],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      child: ListView.builder(
-                        itemBuilder: (context, index) =>
-                            _getChildCat(context, index, child),
-                        itemCount: child.length,
-                        scrollDirection: Axis.horizontal,
+                      SizedBox(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) =>
+                              _getChildCat(context, index, child),
+                          itemCount: child.length,
+                          scrollDirection: Axis.horizontal,
+                        ),
+                        height: 150,
+                        width: double.infinity,
                       ),
-                      height: 150,
-                      width: double.infinity,
-                    ),
-                  ],
-                ),
-              );
-              catList.add(widget);
+                    ],
+                  ),
+                );
+                catList.add(widget);
+              }
             }
           }
-        } else {
-          return const Center(
-            child: Text(
-              'هیچ دسته بندی موجود نمی باشد',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16.0,
-              ),
-            ),
-          );
-        }
-        setState(() {});
-      } else {}
+        });
+      } else {
+        setState(() {
+          state = 'error';
+        });
+      }
+    }).catchError((onError) {
+      setState(() {
+        state = 'error';
+      });
     });
   }
 
   Widget _getChildCat(BuildContext context, int index, List child) {
-    return Container(
-      margin: const EdgeInsets.only(left: 10),
-      child: Column(
-        children: [
-          child[index]['img'] == null
-              ? Image.asset(
-                  'assets/images/img.png',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                )
-              : FadeInImage.assetNetwork(
-                  placeholder: 'assets/images/img.png',
-                  image: Lib.getSiteUrl(
-                    'files/upload/' + child[index]['img'],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  CategoryChild(child[index]['id'], child[index]['name']),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+              transitionDuration: Duration(milliseconds: 300),
+            ));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(left: 10),
+        child: Column(
+          children: [
+            child[index]['img'] == null
+                ? Image.asset(
+                    'assets/images/picture.png',
+                    width: 150,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  )
+                : FadeInImage.assetNetwork(
+                    placeholder: 'assets/images/picture.png',
+                    image: Lib.getSiteUrl(
+                      'files/upload/' + child[index]['img'],
+                    ),
+                    width: 150,
+                    height: 100,
+                    fit: BoxFit.cover,
                   ),
-                  width: 150,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-          const SizedBox(
-            height: 15.0,
-          ),
-          Text(
-            child[index]['name'],
-            style: const TextStyle(
-              fontSize: 14.0,
+            const SizedBox(
+              height: 15.0,
             ),
-          ),
-        ],
-      ),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        borderRadius: BorderRadius.circular(10.0),
+            Text(
+              child[index]['name'],
+              style: const TextStyle(
+                fontSize: 14.0,
+              ),
+            ),
+          ],
+        ),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
       ),
     );
   }
