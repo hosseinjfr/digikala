@@ -52,7 +52,7 @@ class _CategoryChildState extends State<CategoryChild> {
 
   Widget getScreenBody() {
     if (showTabBody) {
-      return Lib.screens[_currentIndex];
+      return Lib.getBodyView(_currentIndex);
     } else {
       return Center(
         child: Text('Category Child'),

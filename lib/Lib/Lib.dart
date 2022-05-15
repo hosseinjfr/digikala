@@ -1,3 +1,4 @@
+import 'package:digikala/Pages/Root/root_page.dart';
 import 'package:flutter/material.dart';
 
 import '../Pages/Category/category.dart';
@@ -20,6 +21,30 @@ class Lib {
     ShoppingCard(),
     MyDigikala(),
   ];
+
+  static Widget getBodyView(_currentIndex) {
+    switch (_currentIndex) {
+      case 1:
+        {
+          return Category();
+        }
+        break;
+      case 2:
+        {
+          return ShoppingCard();
+        }
+        break;
+      case 3:
+        {
+          return MyDigikala();
+        }
+        break;
+      default:
+        {
+          return HomePage();
+        }
+    }
+  }
 
   static List<BottomNavigationBarItem> bnItems() {
     int count = 0;
