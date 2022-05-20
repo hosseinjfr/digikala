@@ -25,8 +25,9 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text(
-          'فروشگاه اینترنتی',
+          'فروشگاه اینترنتی من',
           style: TextStyle(
             fontSize: 17.0,
           ),

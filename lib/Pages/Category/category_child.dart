@@ -17,11 +17,18 @@ class CategoryChild extends StatefulWidget {
 class _CategoryChildState extends State<CategoryChild> {
   int _currentIndex = 1;
   bool showTabBody = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.cat_name),
+        centerTitle: true,
+        title: Text(
+          widget.cat_name,
+          style: const TextStyle(
+            fontSize: 17.0,
+          ),
+        ),
         elevation: 0,
         automaticallyImplyLeading: !showTabBody,
       ),
