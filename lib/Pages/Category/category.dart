@@ -21,7 +21,7 @@ class _CategoryState extends State<Category> {
   @override
   void initState() {
     super.initState();
-    _getCatList();
+    getCategory();
   }
 
   @override
@@ -40,7 +40,7 @@ class _CategoryState extends State<Category> {
             : Error();
   }
 
-  void _getCatList() {
+  void getCategory() {
     var url = Uri.parse(Lib.getApiUrl('getCategory'));
     http.get(url).then((response) {
       if (response.statusCode == 200) {
@@ -68,7 +68,7 @@ class _CategoryState extends State<Category> {
                       SizedBox(
                         child: ListView.builder(
                           itemBuilder: (context, index) =>
-                              _getChildCat(context, index, child),
+                              getCategoryChild(context, index, child),
                           itemCount: child.length,
                           scrollDirection: Axis.horizontal,
                         ),
@@ -95,7 +95,7 @@ class _CategoryState extends State<Category> {
     });
   }
 
-  Widget _getChildCat(BuildContext context, int index, List child) {
+  Widget getCategoryChild(BuildContext context, int index, List child) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -144,7 +144,7 @@ class _CategoryState extends State<Category> {
           ],
         ),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: Colors.white,
           border: Border.all(color: Colors.grey.withOpacity(0.2)),
           borderRadius: BorderRadius.circular(10.0),
         ),
