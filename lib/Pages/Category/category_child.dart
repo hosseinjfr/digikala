@@ -25,6 +25,7 @@ class _CategoryChildState extends State<CategoryChild> {
 
   List category = [];
   List newProduct = [];
+  List bestSelling = [];
   String state = 'load_data';
 
   @override
@@ -32,6 +33,7 @@ class _CategoryChildState extends State<CategoryChild> {
     super.initState();
     getCatChildList();
     getProduct();
+    getBestSellingProduct();
   }
 
   @override
@@ -111,7 +113,7 @@ class _CategoryChildState extends State<CategoryChild> {
                       ),
                     ),
                     Text(
-                      'همه',
+                      'مشاهده همه',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -122,11 +124,45 @@ class _CategoryChildState extends State<CategoryChild> {
                 ),
               ),
               Container(
-                height: 270.0,
+                height: 280.0,
                 child: ListView.builder(
                   itemBuilder: (content, index) =>
                       showProduct(content, index, newProduct),
                   itemCount: newProduct.length,
+                  scrollDirection: Axis.horizontal,
+                ),
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'پرفروش ترین محصولات',
+                      style: TextStyle(
+                        fontSize: 17,
+                      ),
+                    ),
+                    Text(
+                      'مشاهده همه',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: 280.0,
+                child: ListView.builder(
+                  itemBuilder: (content, index) =>
+                      showBestSellingProduct(content, index, bestSelling),
+                  itemCount: bestSelling.length,
                   scrollDirection: Axis.horizontal,
                 ),
               ),
@@ -148,13 +184,13 @@ class _CategoryChildState extends State<CategoryChild> {
           children: [
             category[index]['img'] == null
                 ? Image.asset(
-                    'assets/images/white.png',
+                    'assets/images/whites.png',
                     width: 150,
                     height: 100,
                     fit: BoxFit.cover,
                   )
                 : FadeInImage.assetNetwork(
-                    placeholder: 'assets/images/white.png',
+                    placeholder: 'assets/images/whites.png',
                     image: Lib.getSiteUrl(
                       'files/upload/' + category[index]['img'],
                     ),
@@ -215,81 +251,227 @@ class _CategoryChildState extends State<CategoryChild> {
     });
   }
 
+  void getBestSellingProduct() {
+    var url = Uri.parse(Lib.getApiUrl(
+        'category/best_selling_product/' + widget.cat_id.toString()));
+    http.get(url).then((response) {
+      if (response.statusCode == 200) {
+        setState(() {
+          bestSelling = convert.jsonDecode(response.body);
+        });
+      }
+    });
+  }
+
   Widget showProduct(BuildContext context, int index, List list) {
     String title = list[index]['title'];
     title = title.length > 36 ? title.substring(0, 36) + '...' : title;
     int price2 = list[index]['price'];
     int price1 = 0;
+    int percantage = 0;
 
-    if (list[index]['discount_price'] != null) {
+    if (list[index]['discount_price'] != null &&
+        list[index]['discount_price'] != 0) {
       price1 = price2 + int.parse(list[index]['discount_price'].toString());
+
+      percantage = ((price2 / price1) * 100).floor();
+      percantage = 100 - percantage;
     }
 
     return GestureDetector(
       onTap: () {},
-      child: Container(
-        margin: const EdgeInsets.only(left: 10.0),
-        child: Column(
-          children: [
-            list[index]['image_url'] == null
-                ? Image.asset(
-                    'assets/images/white.png',
-                    width: 150,
-                    height: 140,
-                    fit: BoxFit.cover,
-                  )
-                : FadeInImage.assetNetwork(
-                    placeholder: 'assets/images/white.png',
-                    image: Lib.getSiteUrl(
-                      'files/thumbnails/' + list[index]['image_url'],
-                    ),
-                    width: 150,
-                    height: 150,
-                    fit: BoxFit.cover,
-                  ),
-            const SizedBox(
-              height: 20.0,
-            ),
-            SizedBox(
-              width: 200.0,
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14.0,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-              ),
-            ),
-            Row(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 10.0),
+        child: Container(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Column(
               children: [
-                Column(
-                  children: [
-                    Text(
-                      price2.toString() + ' تومان',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                list[index]['image_url'] == null
+                    ? Image.asset(
+                        'assets/images/whites.png',
+                        width: 150,
+                        height: 140,
+                        fit: BoxFit.cover,
+                      )
+                    : FadeInImage.assetNetwork(
+                        placeholder: 'assets/images/whites.png',
+                        image: Lib.getSiteUrl(
+                          'files/thumbnails/' + list[index]['image_url'],
+                        ),
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
                       ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                SizedBox(
+                  width: 200.0,
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14.0,
                     ),
-                    price1 != 0
-                        ? Text(
-                            price1.toString() + ' تومان',
-                            style: TextStyle(
-                              decoration: TextDecoration.lineThrough,
-                              fontSize: 13.0,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                  ),
+                ),
+                Row(
+                  children: [
+                    percantage > 0
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            child: Container(
+                              child: Text(
+                                '%' + Lib.getPercentage(percantage),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
                             ),
                           )
-                        : Text(''),
+                        : Container(),
+                    Column(
+                      children: [
+                        Text(
+                          Lib.getPrice(price2),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        price1 != 0
+                            ? Text(
+                                Lib.getPrice(price1),
+                                style: TextStyle(
+                                  decoration: TextDecoration.lineThrough,
+                                  fontSize: 13.0,
+                                ),
+                              )
+                            : Text(''),
+                      ],
+                    ),
                   ],
                 ),
               ],
             ),
-          ],
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
         ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.withOpacity(0.2)),
-          borderRadius: BorderRadius.circular(10.0),
+      ),
+    );
+  }
+
+  Widget showBestSellingProduct(BuildContext context, int index, List list) {
+    String title = list[index]['title'];
+    title = title.length > 36 ? title.substring(0, 36) + '...' : title;
+    int price2 = list[index]['price'];
+    int price1 = 0;
+    int percantage = 0;
+
+    if (list[index]['discount_price'] != null &&
+        list[index]['discount_price'] != 0) {
+      price1 = price2 + int.parse(list[index]['discount_price'].toString());
+
+      percantage = ((price2 / price1) * 100).floor();
+      percantage = 100 - percantage;
+    }
+
+    return GestureDetector(
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.only(left: 10.0),
+        child: Container(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Column(
+              children: [
+                list[index]['image_url'] == null
+                    ? Image.asset(
+                        'assets/images/whites.png',
+                        width: 150,
+                        height: 140,
+                        fit: BoxFit.cover,
+                      )
+                    : FadeInImage.assetNetwork(
+                        placeholder: 'assets/images/whites.png',
+                        image: Lib.getSiteUrl(
+                          'files/thumbnails/' + list[index]['image_url'],
+                        ),
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                SizedBox(
+                  width: 200.0,
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                  ),
+                ),
+                Row(
+                  children: [
+                    percantage > 0
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            child: Container(
+                              child: Text(
+                                '%' + Lib.getPercentage(percantage),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                          )
+                        : Container(),
+                    Column(
+                      children: [
+                        Text(
+                          Lib.getPrice(price2),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        price1 != 0
+                            ? Text(
+                                Lib.getPrice(price1),
+                                style: TextStyle(
+                                  decoration: TextDecoration.lineThrough,
+                                  fontSize: 13.0,
+                                ),
+                              )
+                            : Text(''),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
         ),
       ),
     );

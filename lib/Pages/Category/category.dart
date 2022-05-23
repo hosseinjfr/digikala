@@ -118,13 +118,13 @@ class _CategoryState extends State<Category> {
           children: [
             child[index]['img'] == null
                 ? Image.asset(
-                    'assets/images/picture.png',
+                    'assets/images/whites.png',
                     width: 150,
                     height: 100,
                     fit: BoxFit.cover,
                   )
                 : FadeInImage.assetNetwork(
-                    placeholder: 'assets/images/picture.png',
+                    placeholder: 'assets/images/whites.png',
                     image: Lib.getSiteUrl(
                       'files/upload/' + child[index]['img'],
                     ),

@@ -5,6 +5,7 @@ import '../Pages/Category/category.dart';
 import '../Pages/Home/home_page.dart';
 import '../Pages/MyDigikala/my_digikala.dart';
 import '../Pages/ShoppingCard/shopping_card.dart';
+import 'package:intl/intl.dart';
 
 class Lib {
   static String getApiUrl(String url) {
@@ -99,5 +100,15 @@ class Lib {
         label: 'فروشگاه من',
       ),
     ];
+  }
+
+  static String getPrice(int price) {
+    var formatter = NumberFormat('###,###', 'fa');
+    return formatter.format(price).toString() + ' تومان';
+  }
+
+  static String getPercentage(int percentage) {
+    var formatter = NumberFormat('###', 'fa');
+    return formatter.format(percentage).toString() + ' تخفیف';
   }
 }
