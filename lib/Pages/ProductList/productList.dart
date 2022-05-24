@@ -1,26 +1,27 @@
+import 'dart:convert';
+
 import 'package:digikala/Lib/Lib.dart';
 import 'package:digikala/Lib/error.dart';
-import 'package:digikala/Pages/ProductList/productList.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
 import '../../Lib/loading.dart';
 
-class CategoryChild extends StatefulWidget {
+class ProductList extends StatefulWidget {
   int cat_id = 0;
   String cat_name = '';
 
-  CategoryChild(int catId, String catName) {
+  ProductList(int catId, String catName) {
     this.cat_id = catId;
     this.cat_name = catName;
   }
 
   @override
-  State<CategoryChild> createState() => _CategoryChildState();
+  State<ProductList> createState() => _ProductListState();
 }
 
-class _CategoryChildState extends State<CategoryChild> {
+class _ProductListState extends State<ProductList> {
   int _currentIndex = 1;
   bool showTabBody = false;
 
@@ -29,12 +30,14 @@ class _CategoryChildState extends State<CategoryChild> {
   List bestSelling = [];
   String state = 'load_data';
 
+  late Map<String, dynamic> serverData;
+  List productList = [];
+
   @override
   void initState() {
     super.initState();
-    getCatChildList();
-    getProduct();
-    getBestSellingProduct();
+    getProductList();
+    // getBestSellingProduct();
   }
 
   @override
@@ -84,99 +87,17 @@ class _CategoryChildState extends State<CategoryChild> {
 
   Widget getContent() {
     if (state == 'get_data') {
-      return SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: Column(
-            children: [
-              Container(
-                margin: EdgeInsets.only(top: 20.0),
-                height: 150.0,
-                child: ListView.builder(
-                  itemBuilder: (content, index) =>
-                      getCategoryChild(content, index),
-                  itemCount: category.length,
-                  scrollDirection: Axis.horizontal,
-                ),
+      return Padding(
+        padding: const EdgeInsets.only(right: 10),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemBuilder: productView,
+                itemCount: productList.length,
               ),
-              SizedBox(
-                height: 20,
-              ),
-              newProduct.length > 0
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 20.0, right: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'جدیدترین محصولات',
-                            style: TextStyle(
-                              fontSize: 17,
-                            ),
-                          ),
-                          Text(
-                            'مشاهده همه',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Container(),
-              newProduct.length > 0
-                  ? Container(
-                      height: 280.0,
-                      child: ListView.builder(
-                        itemBuilder: (content, index) =>
-                            showProduct(content, index, newProduct),
-                        itemCount: newProduct.length,
-                        scrollDirection: Axis.horizontal,
-                      ),
-                    )
-                  : Container(),
-              SizedBox(
-                height: 10.0,
-              ),
-              bestSelling.length > 0
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 20.0, right: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'پرفروش ترین محصولات',
-                            style: TextStyle(
-                              fontSize: 17,
-                            ),
-                          ),
-                          Text(
-                            'مشاهده همه',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Container(),
-              bestSelling.length > 0
-                  ? Container(
-                      height: 280.0,
-                      child: ListView.builder(
-                        itemBuilder: (content, index) =>
-                            showBestSellingProduct(content, index, bestSelling),
-                        itemCount: bestSelling.length,
-                        scrollDirection: Axis.horizontal,
-                      ),
-                    )
-                  : Container(),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     } else {
@@ -184,106 +105,47 @@ class _CategoryChildState extends State<CategoryChild> {
     }
   }
 
-  Widget getCategoryChild(BuildContext context, int index) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  ProductList(category[index]['id'], category[index]['name']),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) =>
-                      FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
-              transitionDuration: Duration(milliseconds: 300),
-            ));
-      },
-      child: Container(
-        margin: const EdgeInsets.only(left: 10),
-        child: Column(
-          children: [
-            category[index]['img'] == null
-                ? Image.asset(
-                    'assets/images/whites.png',
-                    width: 150,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  )
-                : FadeInImage.assetNetwork(
-                    placeholder: 'assets/images/whites.png',
-                    image: Lib.getSiteUrl(
-                      'files/upload/' + category[index]['img'],
+  void getProductList() {
+    var url = Uri.parse(Lib.getApiUrl('product/getList'));
+    http.post(url, body: {'cat_id': widget.cat_id.toString()}).then((response) {
+      if (response.statusCode == 200) {
+        state = 'get_data';
+        setState(() {
+          serverData = convert.jsonDecode(response.body);
+          productList = serverData['product']['data'];
+          print(productList);
+        });
+      }
+    });
+  }
+
+  Widget productView(BuildContext context, int index) {
+    return Container(
+      child: Row(
+        children: [
+          Column(
+            children: [
+              productList[index]['image_url'] == null
+                  ? Image.asset(
+                      'assets/images/whites.png',
+                      width: 150,
+                      height: 140,
+                      fit: BoxFit.cover,
+                    )
+                  : FadeInImage.assetNetwork(
+                      placeholder: 'assets/images/whites.png',
+                      image: Lib.getSiteUrl(
+                        'files/thumbnails/' + productList[index]['image_url'],
+                      ),
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
                     ),
-                    width: 150,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-            const SizedBox(
-              height: 15.0,
-            ),
-            Text(
-              category[index]['name'],
-              style: const TextStyle(
-                fontSize: 14.0,
-              ),
-            ),
-          ],
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.withOpacity(0.2)),
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+            ],
+          ),
+        ],
       ),
     );
-  }
-
-  void getCatChildList() {
-    var url = Uri.parse(
-        Lib.getApiUrl('getChildCategory/' + widget.cat_id.toString()));
-    http.get(url).then((response) {
-      if (response.statusCode == 200) {
-        setState(() {
-          state = 'get_data';
-          category = convert.jsonDecode(response.body);
-        });
-      } else {
-        setState(() {
-          state = 'error';
-        });
-      }
-    }).catchError((onError) {
-      setState(() {
-        state = 'error';
-      });
-    });
-  }
-
-  void getProduct() {
-    var url = Uri.parse(
-        Lib.getApiUrl('category/new_product/' + widget.cat_id.toString()));
-    http.get(url).then((response) {
-      if (response.statusCode == 200) {
-        setState(() {
-          newProduct = convert.jsonDecode(response.body);
-        });
-      }
-    });
-  }
-
-  void getBestSellingProduct() {
-    var url = Uri.parse(Lib.getApiUrl(
-        'category/best_selling_product/' + widget.cat_id.toString()));
-    http.get(url).then((response) {
-      if (response.statusCode == 200) {
-        setState(() {
-          bestSelling = convert.jsonDecode(response.body);
-        });
-      }
-    });
   }
 
   Widget showProduct(BuildContext context, int index, List list) {
