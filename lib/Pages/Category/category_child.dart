@@ -344,8 +344,11 @@ class _CategoryChildState extends State<CategoryChild> {
                   children: [
                     percantage > 0
                         ? Padding(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10.0),
                               child: Text(
                                 '%' + Lib.getPercentage(percantage),
                                 style: const TextStyle(

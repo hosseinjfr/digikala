@@ -109,6 +109,11 @@ class Lib {
 
   static String getPercentage(int percentage) {
     var formatter = NumberFormat('###', 'fa');
-    return formatter.format(percentage).toString() + ' تخفیف';
+    return formatter.format(percentage).toString() + '';
+  }
+
+  static String getNumber(double number) {
+    var formatter = NumberFormat('#.#', 'fa');
+    return formatter.format(number).toString();
   }
 }
