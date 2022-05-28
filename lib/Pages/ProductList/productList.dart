@@ -158,9 +158,7 @@ class _ProductListState extends State<ProductList> {
                           height: 110,
                           fit: BoxFit.cover,
                         ),
-                  Expanded(
-                    child: getProductColor(productList[index]),
-                  )
+                  // getProductColor(productList[index]),
                 ],
               ),
               Expanded(
@@ -282,7 +280,6 @@ class _ProductListState extends State<ProductList> {
         }
       }
       children.add(widget);
-
       return Row(
         children: children,
       );
